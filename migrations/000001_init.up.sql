@@ -1,0 +1,12 @@
+-- Up migration: creates the tournaments table
+CREATE TABLE IF NOT EXISTS tournaments(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    tournament_date DATE NOT NULL,
+    matches_amount INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create an index on name for better query performance
+CREATE INDEX idx_tournaments_name ON tournaments(name);
