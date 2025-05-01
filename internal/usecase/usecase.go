@@ -9,8 +9,9 @@ import (
 )
 
 type TournamentRepository interface {
-	Select(ctx context.Context, tournamentId int) (*dtos.GetTournamentResponse, error)
+	SelectById(ctx context.Context, tournamentId int) (*dtos.GetTournamentByIdResponse, error)
 	Insert(ctx context.Context, tournament dtos.CreateTournamentRequest) error
+	UpdateById(ctx context.Context, req dtos.CreateTournamentRequest, tournamentId int) error
 }
 
 // All service repositories

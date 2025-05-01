@@ -29,7 +29,7 @@ type Tournament struct {
 
 func newTournament(t dtos.CreateTournamentRequest) Tournament {
 	// "02-01-2006" is just format string
-	tournamentDate, _ := time.Parse("02-01-2006", t.TournamentDate)
+	tournamentDate, _ := time.Parse("02-01-2006 15:04:05", t.TournamentDate)
 
 	return Tournament{
 		Name:           t.Name,
@@ -38,9 +38,9 @@ func newTournament(t dtos.CreateTournamentRequest) Tournament {
 	}
 }
 
-func (r *TournamentRepository) Select(ctx context.Context, tournamentId int) (*dtos.GetTournamentResponse, error) {
+func (r *TournamentRepository) SelectById(ctx context.Context, tournamentId int) (*dtos.GetTournamentByIdResponse, error) {
 	query := `
-		SELECT id, name, tournament_date, matches_amount
+		SELECT name, tournament_date, matches_amount
 		FROM tournaments WHERE id = :id
 	`
 
@@ -64,18 +64,17 @@ func (r *TournamentRepository) Select(ctx context.Context, tournamentId int) (*d
 		return nil, errors.New("failed to get tournament: " + err.Error())
 	}
 
-	response := &dtos.GetTournamentResponse{
-		Id:             tournament.Id,
+	response := &dtos.GetTournamentByIdResponse{
 		Name:           tournament.Name,
-		TournamentDate: tournament.TournamentDate,
+		TournamentDate: tournament.TournamentDate.Format("02-01-2006 15:04:05"),
 		MatchesAmount:  tournament.MatchesAmount,
 	}
 
 	return response, nil
 }
 
-func (r *TournamentRepository) Insert(ctx context.Context, a dtos.CreateTournamentRequest) error {
-	tournament := newTournament(a)
+func (r *TournamentRepository) Insert(ctx context.Context, req dtos.CreateTournamentRequest) error {
+	tournament := newTournament(req)
 
 	// Start transaction
 	tx, err := r.db.BeginTxx(ctx, nil)
@@ -99,6 +98,44 @@ func (r *TournamentRepository) Insert(ctx context.Context, a dtos.CreateTourname
 	_, err = tx.NamedExecContext(ctx, query, tournament)
 	if err != nil {
 		return errors.New("failed to insert tournament: " + err.Error())
+	}
+
+	// Commit transaction
+	if err = tx.Commit(); err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
+	}
+
+	return nil
+}
+
+func (r *TournamentRepository) UpdateById(
+	ctx context.Context, req dtos.CreateTournamentRequest, tournamentId int,
+) error {
+	tournament := newTournament(req)
+	tournament.Id = tournamentId
+
+	// Start transaction
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return errors.New("failed to begin transaction: " + err.Error())
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	query := `
+		UPDATE tournaments SET
+			name = :name,
+			tournament_date = :tournament_date,
+			matches_amount = :matches_amount
+	    WHERE id = :id
+	`
+
+	_, err = tx.NamedExecContext(ctx, query, tournament)
+	if err != nil {
+		return errors.New("failed to update tournament: " + err.Error())
 	}
 
 	// Commit transaction

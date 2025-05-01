@@ -20,8 +20,9 @@ import (
 )
 
 type TournamentUsecase interface {
+	GetById(ctx context.Context, tournamentId string) (*dtos.GetTournamentByIdResponse, error)
 	Create(ctx context.Context, dto dtos.CreateTournamentRequest) error
-	GetById(ctx context.Context, tournamentId string) (*dtos.GetTournamentResponse, error)
+	UpdateById(ctx context.Context, request_body io.ReadCloser, tournamentId string) error
 }
 
 type TournamentRouter struct {
@@ -47,8 +48,9 @@ func ConfigureTournamentRouter(r *TournamentRouter) {
 	// Auth middleware
 	// r.defaultHandler.Use(auth.AuthMiddleware)
 
-	r.defaultHandler.Post("/api/v1/tournament/create-tournament", r.CreateTournamentHandler)
 	r.defaultHandler.Get("/api/v1/tournament/get-one-tournament/{id}", r.GetTournamentByIdHandler)
+	r.defaultHandler.Post("/api/v1/tournament/create-tournament", r.CreateTournamentHandler)
+	r.defaultHandler.Patch("/api/v1/tournament/update-tournament/{id}", r.UpdateTournamentByIdHandler)
 	// ...
 }
 
@@ -78,7 +80,7 @@ func (a *TournamentRouter) GetTournamentByIdHandler(w http.ResponseWriter, r *ht
 	response.JSON(w, http.StatusOK, tournament)
 }
 
-func (a *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *http.Request) {
+func (t *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
 
@@ -89,33 +91,24 @@ func (a *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *htt
 	if err != nil {
 		// EOF means there is no data in the request body
 		if errors.Is(err, io.EOF) {
-			a.logger.Error("request body is empty", slogerr.Error(err))
+			t.logger.Error("request body is empty", slogerr.Error(err))
 			response.JSON(w, http.StatusBadRequest, "request body is empty")
 			return
 		}
 
-		a.logger.Error("failed to decode request body", slogerr.Error(err))
+		t.logger.Error("failed to decode request body", slogerr.Error(err))
 		response.JSON(w, http.StatusBadRequest, "failed to decode request body")
 		return
 	}
 
 	// Validate request fields
-	err = validator.New().Struct(request)
-	if err != nil {
-		var errors []string
-		if validationErrors, ok := err.(validator.ValidationErrors); ok {
-			for _, fieldErr := range validationErrors {
-				errors = append(errors, getValidationMsg(fieldErr))
-			}
-		}
-
-		resp := map[string]any{"errors": errors}
-
-		response.JSON(w, http.StatusBadRequest, resp)
+	errs := validateRequestBody(request)
+	if errs != nil {
+		response.JSON(w, http.StatusBadRequest, errs)
 		return
 	}
 
-	err = a.usecase.Create(ctx, request)
+	err = t.usecase.Create(ctx, request)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
 			response.JSON(w, http.StatusRequestTimeout, err.Error())
@@ -129,6 +122,24 @@ func (a *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *htt
 	}
 }
 
+func validateRequestBody(request any) map[string]any {
+	var errs map[string]any
+
+	err := validator.New().Struct(request)
+	if err != nil {
+		var errors []string
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			for _, fieldErr := range validationErrors {
+				errors = append(errors, getValidationMsg(fieldErr))
+			}
+		}
+
+		errs = map[string]any{"errors": errors}
+	}
+
+	return errs
+}
+
 func getValidationMsg(fe validator.FieldError) string {
 	switch fe.Tag() {
 	case "required":
@@ -138,4 +149,28 @@ func getValidationMsg(fe validator.FieldError) string {
 	}
 
 	return "validation error"
+}
+
+func (t *TournamentRouter) UpdateTournamentByIdHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
+	defer cancel()
+
+	tournamentId := chi.URLParam(r, "id")
+	if tournamentId == "" {
+		t.logger.Error("tournament id param is empty")
+
+		response.JSON(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+
+	err := t.usecase.UpdateById(ctx, r.Body, tournamentId)
+	if err != nil {
+		if strings.Contains(err.Error(), "failed") {
+			response.JSON(w, http.StatusInternalServerError, err.Error())
+		} else {
+			response.JSON(w, http.StatusBadRequest, err.Error())
+		}
+
+		return
+	}
 }
