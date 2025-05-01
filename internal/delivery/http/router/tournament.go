@@ -23,6 +23,7 @@ type TournamentUsecase interface {
 	GetById(ctx context.Context, tournamentId string) (*dtos.GetTournamentByIdResponse, error)
 	Create(ctx context.Context, dto dtos.CreateTournamentRequest) error
 	UpdateById(ctx context.Context, request_body io.ReadCloser, tournamentId string) error
+	DeleteById(ctx context.Context, tournamentId string) error
 }
 
 type TournamentRouter struct {
@@ -51,6 +52,7 @@ func ConfigureTournamentRouter(r *TournamentRouter) {
 	r.defaultHandler.Get("/api/v1/tournament/get-one-tournament/{id}", r.GetTournamentByIdHandler)
 	r.defaultHandler.Post("/api/v1/tournament/create-tournament", r.CreateTournamentHandler)
 	r.defaultHandler.Patch("/api/v1/tournament/update-tournament/{id}", r.UpdateTournamentByIdHandler)
+	r.defaultHandler.Delete("/api/v1/tournament/delete-tournament/{id}", r.DeleteTournamentByIdHandler)
 	// ...
 }
 
@@ -164,6 +166,30 @@ func (t *TournamentRouter) UpdateTournamentByIdHandler(w http.ResponseWriter, r 
 	}
 
 	err := t.usecase.UpdateById(ctx, r.Body, tournamentId)
+	if err != nil {
+		if strings.Contains(err.Error(), "failed") {
+			response.JSON(w, http.StatusInternalServerError, err.Error())
+		} else {
+			response.JSON(w, http.StatusBadRequest, err.Error())
+		}
+
+		return
+	}
+}
+
+func (t *TournamentRouter) DeleteTournamentByIdHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
+	defer cancel()
+
+	tournamentId := chi.URLParam(r, "id")
+	if tournamentId == "" {
+		t.logger.Error("tournament id param is empty")
+
+		response.JSON(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+
+	err := t.usecase.DeleteById(ctx, tournamentId)
 	if err != nil {
 		if strings.Contains(err.Error(), "failed") {
 			response.JSON(w, http.StatusInternalServerError, err.Error())

@@ -12,6 +12,7 @@ type TournamentRepository interface {
 	SelectById(ctx context.Context, tournamentId int) (*dtos.GetTournamentByIdResponse, error)
 	Insert(ctx context.Context, tournament dtos.CreateTournamentRequest) error
 	UpdateById(ctx context.Context, req dtos.CreateTournamentRequest, tournamentId int) error
+	DeleteById(ctx context.Context, tournamentId int) error
 }
 
 // All service repositories

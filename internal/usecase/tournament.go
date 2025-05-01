@@ -87,3 +87,19 @@ func (u *TournamentUsecase) UpdateById(
 
 	return nil
 }
+
+func (u *TournamentUsecase) DeleteById(ctx context.Context, tournamentId string) error {
+	id, err := strconv.Atoi(tournamentId)
+	if err != nil {
+		u.logger.Error("id conversion error", slogerr.Error(err))
+		return err
+	}
+
+	err = u.repository.DeleteById(ctx, id)
+	if err != nil {
+		u.logger.Error("delete tournament", slogerr.Error(err))
+		return err
+	}
+
+	return nil
+}

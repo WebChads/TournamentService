@@ -145,3 +145,32 @@ func (r *TournamentRepository) UpdateById(
 
 	return nil
 }
+
+func (r *TournamentRepository) DeleteById(ctx context.Context, tournamentId int) error {
+	// Start transaction
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return errors.New("failed to begin transaction: " + err.Error())
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	query := `DELETE FROM tournaments WHERE id = :id`
+
+	params := map[string]any{"id": tournamentId}
+
+	_, err = tx.NamedExecContext(ctx, query, params)
+	if err != nil {
+		return errors.New("failed to delete tournament: " + err.Error())
+	}
+
+	// Commit transaction
+	if err = tx.Commit(); err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
+	}
+
+	return nil
+}
