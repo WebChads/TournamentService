@@ -24,6 +24,261 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/tournament/create-tournament": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tournaments"
+                ],
+                "summary": "Create new tournament",
+                "parameters": [
+                    {
+                        "description": "Dto with tournament information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateTournamentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully create new tournament"
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Happened internal error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tournament/delete-tournament/{id}": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tournaments"
+                ],
+                "summary": "Delete tournament by tournament id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Tournament id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully delete tournament by id"
+                    },
+                    "400": {
+                        "description": "Tournament id param is empty",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Happened internal error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tournament/get-one-tournament/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tournaments"
+                ],
+                "summary": "Get tournament by tournament id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Tournament Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get tournament by id",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.GetTournamentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "No tournament with such id",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Happened internal error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tournament/get-tournaments": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tournaments"
+                ],
+                "summary": "Get any tournaments by owner user id",
+                "responses": {
+                    "200": {
+                        "description": "Successfully get tournaments by owner user id",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.GetTournamentResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Happened internal error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tournament/get-tournaments/{name}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tournaments"
+                ],
+                "summary": "Get any tournaments contains a given name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "string",
+                        "description": "Tournament name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get tournaments by name",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.GetTournamentResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Tournament name param is empty",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Happened internal error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tournament/update-tournament/{id}": {
+            "patch": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tournaments"
+                ],
+                "summary": "Update tournament by tournament id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Tournament id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dto with tournament information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateTournamentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully update tournament by id"
+                    },
+                    "400": {
+                        "description": "Request body is empty",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Happened internal error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/tournaments/{id}/bids/create-bid": {
             "post": {
                 "consumes": [
@@ -86,6 +341,24 @@ const docTemplate = `{
                     "Bids"
                 ],
                 "summary": "Get bid by specific bid status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Tournament Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "int",
+                        "description": "Bid status",
+                        "name": "bid-status",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successfully get list of needed bids",
@@ -123,6 +396,24 @@ const docTemplate = `{
                     "Bids"
                 ],
                 "summary": "Delete bit from the bid list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Tournament Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Bid Id",
+                        "name": "bid_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successfully delete specific bid"
@@ -217,6 +508,28 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.CreateTournamentRequest": {
+            "type": "object",
+            "required": [
+                "matches_amount",
+                "name",
+                "tournament_date"
+            ],
+            "properties": {
+                "matches_amount": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tournament_date": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.GetBidResponse": {
             "type": "object",
             "properties": {
@@ -233,6 +546,23 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "full_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.GetTournamentResponse": {
+            "type": "object",
+            "properties": {
+                "matches_amount": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tournament_date": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }

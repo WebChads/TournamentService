@@ -16,6 +16,21 @@ definitions:
     - age
     - full_name
     type: object
+  dtos.CreateTournamentRequest:
+    properties:
+      matches_amount:
+        type: integer
+      name:
+        type: string
+      tournament_date:
+        type: string
+      user_id:
+        type: string
+    required:
+    - matches_amount
+    - name
+    - tournament_date
+    type: object
   dtos.GetBidResponse:
     properties:
       age:
@@ -27,6 +42,17 @@ definitions:
       bid_status:
         type: integer
       full_name:
+        type: string
+    type: object
+  dtos.GetTournamentResponse:
+    properties:
+      matches_amount:
+        type: integer
+      name:
+        type: string
+      tournament_date:
+        type: string
+      user_id:
         type: string
     type: object
   dtos.Response:
@@ -52,10 +78,190 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
+  /api/v1/tournament/create-tournament:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Dto with tournament information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateTournamentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully create new tournament
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Happened internal error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Create new tournament
+      tags:
+      - Tournaments
+  /api/v1/tournament/delete-tournament/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Tournament id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully delete tournament by id
+        "400":
+          description: Tournament id param is empty
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Happened internal error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Delete tournament by tournament id
+      tags:
+      - Tournaments
+  /api/v1/tournament/get-one-tournament/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Tournament Id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get tournament by id
+          schema:
+            $ref: '#/definitions/dtos.GetTournamentResponse'
+        "400":
+          description: No tournament with such id
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Happened internal error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get tournament by tournament id
+      tags:
+      - Tournaments
+  /api/v1/tournament/get-tournaments:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get tournaments by owner user id
+          schema:
+            items:
+              $ref: '#/definitions/dtos.GetTournamentResponse'
+            type: array
+        "500":
+          description: Happened internal error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get any tournaments by owner user id
+      tags:
+      - Tournaments
+  /api/v1/tournament/get-tournaments/{name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Tournament name
+        format: string
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get tournaments by name
+          schema:
+            items:
+              $ref: '#/definitions/dtos.GetTournamentResponse'
+            type: array
+        "400":
+          description: Tournament name param is empty
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Happened internal error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get any tournaments contains a given name
+      tags:
+      - Tournaments
+  /api/v1/tournament/update-tournament/{id}:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Tournament id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dto with tournament information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateTournamentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully update tournament by id
+        "400":
+          description: Request body is empty
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Happened internal error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Update tournament by tournament id
+      tags:
+      - Tournaments
   /api/v1/tournaments/{id}/bids/{bid_id}/cancel-bid:
     delete:
       consumes:
       - application/json
+      parameters:
+      - description: Tournament Id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Bid Id
+        format: uuid
+        in: path
+        name: bid_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -142,6 +348,19 @@ paths:
     get:
       consumes:
       - application/json
+      parameters:
+      - description: Tournament Id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Bid status
+        format: int
+        in: query
+        name: bid-status
+        required: true
+        type: string
       produces:
       - application/json
       responses:

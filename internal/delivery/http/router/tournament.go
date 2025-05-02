@@ -63,6 +63,18 @@ func ConfigureTournamentRouter(r *TournamentRouter) {
 	// ...
 }
 
+// GetTournamentByIdHandler godoc
+// @Title GetTournamentByIdHandler
+// @Summary Get tournament by tournament id
+// @Tags Tournaments
+// @Accept json
+// @Produce json
+// @Param id path string true "Tournament Id" format(uuid)
+// @Success 200 {object} dtos.GetTournamentResponse "Successfully get tournament by id"
+// @Failure 400 {object} dtos.Response "Tournament id param is empty"
+// @Failure 400 {object} dtos.Response "No tournament with such id"
+// @Failure 500 {object} dtos.Response "Happened internal error"
+// @Router /api/v1/tournament/get-one-tournament/{id} [get]
 func (t *TournamentRouter) GetTournamentByIdHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
@@ -88,6 +100,17 @@ func (t *TournamentRouter) GetTournamentByIdHandler(w http.ResponseWriter, r *ht
 	response.JSON(w, http.StatusOK, tournament)
 }
 
+// GetTournamentByNameHandler godoc
+// @Title GetTournamentByNameHandler
+// @Summary Get any tournaments contains a given name
+// @Tags Tournaments
+// @Accept json
+// @Produce json
+// @Param name path string true "Tournament name" format(string)
+// @Success 200 {object} []dtos.GetTournamentResponse "Successfully get tournaments by name"
+// @Failure 400 {object} dtos.Response "Tournament name param is empty"
+// @Failure 500 {object} dtos.Response "Happened internal error"
+// @Router /api/v1/tournament/get-tournaments/{name} [get]
 func (t *TournamentRouter) GetTournamentByNameHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
@@ -113,6 +136,15 @@ func (t *TournamentRouter) GetTournamentByNameHandler(w http.ResponseWriter, r *
 	response.JSON(w, http.StatusOK, tournaments)
 }
 
+// GetTournamentByOwnHandler godoc
+// @Title GetTournamentByOwnHandler
+// @Summary Get any tournaments by owner user id
+// @Tags Tournaments
+// @Accept json
+// @Produce json
+// @Success 200 {object} []dtos.GetTournamentResponse "Successfully get tournaments by owner user id"
+// @Failure 500 {object} dtos.Response "Happened internal error"
+// @Router /api/v1/tournament/get-tournaments [get]
 func (t *TournamentRouter) GetTournamentByOwnHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
@@ -142,6 +174,19 @@ func (t *TournamentRouter) GetTournamentByOwnHandler(w http.ResponseWriter, r *h
 	response.JSON(w, http.StatusOK, tournaments)
 }
 
+// CreateTournamentHandler godoc
+// @Title CreateTournamentHandler
+// @Summary Create new tournament
+// @Tags Tournaments
+// @Accept json
+// @Produce json
+// @Param request body dtos.CreateTournamentRequest true "Dto with tournament information"
+// @Success 200 "Successfully create new tournament"
+// @Failure 400 {object} dtos.Response "Request body is empty"
+// @Failure 400 {object} dtos.Response "Failed to decode request body"
+// @Failure 400 {object} dtos.Response "Validation error"
+// @Failure 500 {object} dtos.Response "Happened internal error"
+// @Router /api/v1/tournament/create-tournament [post]
 func (t *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
@@ -190,6 +235,20 @@ func (t *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *htt
 	}
 }
 
+// UpdateTournamentByIdHandler godoc
+// @Title UpdateTournamentByIdHandler
+// @Summary Update tournament by tournament id
+// @Tags Tournaments
+// @Accept json
+// @Produce json
+// @Param id path string true "Tournament id" format(uuid)
+// @Param request body dtos.CreateTournamentRequest true "Dto with tournament information"
+// @Success 200 "Successfully update tournament by id"
+// @Failure 400 {object} dtos.Response "Tournament id param is empty"
+// @Failure 400 {object} dtos.Response "No tournament with such id"
+// @Failure 400 {object} dtos.Response "Request body is empty"
+// @Failure 500 {object} dtos.Response "Happened internal error"
+// @Router /api/v1/tournament/update-tournament/{id} [patch]
 func (t *TournamentRouter) UpdateTournamentByIdHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
@@ -213,6 +272,17 @@ func (t *TournamentRouter) UpdateTournamentByIdHandler(w http.ResponseWriter, r 
 	}
 }
 
+// DeleteTournamentByIdHandler godoc
+// @Title DeleteTournamentByIdHandler
+// @Summary Delete tournament by tournament id
+// @Tags Tournaments
+// @Accept json
+// @Produce json
+// @Param id path string true "Tournament id" format(uuid)
+// @Success 200 "Successfully delete tournament by id"
+// @Failure 400 {object} dtos.Response "Tournament id param is empty"
+// @Failure 500 {object} dtos.Response "Happened internal error"
+// @Router /api/v1/tournament/delete-tournament/{id} [delete]
 func (t *TournamentRouter) DeleteTournamentByIdHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
