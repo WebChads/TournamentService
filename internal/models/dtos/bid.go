@@ -22,3 +22,8 @@ type GetBidResponse struct {
 	AvatarUrl string    `json:"avatar_url"`
 	BidStatus int       `json:"bid_status"`
 }
+
+type UpdateBidStatusRequest struct {
+	BidId     uuid.UUID `json:"bid_id"`
+	BidStatus int       `json:"bid_status" validate:"required"`
+}

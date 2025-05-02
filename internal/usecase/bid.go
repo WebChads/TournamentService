@@ -41,3 +41,15 @@ func (u *BidUsecase) Create(ctx context.Context, bid dtos.CreateBidRequest) erro
 
 	return nil
 }
+
+func (u *BidUsecase) UpdateStatus(
+	ctx context.Context, dto dtos.UpdateBidStatusRequest,
+) error {
+	err := u.repository.UpdateStatus(ctx, dto)
+	if err != nil {
+		u.logger.Error("update bid status", slogerr.Error(err))
+		return err
+	}
+
+	return nil
+}

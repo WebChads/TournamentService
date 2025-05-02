@@ -21,6 +21,7 @@ type TournamentRepository interface {
 type BidRepository interface {
 	SelectByStatus(ctx context.Context, dto dtos.GetBidRequest) ([]dtos.GetBidResponse, error)
 	Insert(ctx context.Context, tournament dtos.CreateBidRequest) error
+	UpdateStatus(ctx context.Context, dto dtos.UpdateBidStatusRequest) error
 }
 
 // All service repositories

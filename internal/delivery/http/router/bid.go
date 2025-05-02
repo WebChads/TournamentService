@@ -21,6 +21,7 @@ import (
 type BidUsecase interface {
 	GetByStatus(ctx context.Context, dto dtos.GetBidRequest) ([]dtos.GetBidResponse, error)
 	Create(ctx context.Context, dto dtos.CreateBidRequest) error
+	UpdateStatus(ctx context.Context, dto dtos.UpdateBidStatusRequest) error
 }
 
 type BidRouter struct {
@@ -49,6 +50,8 @@ func ConfigureBidRouter(r *BidRouter) {
 	r.defaultHandler.Get("/api/v1/tournaments/{id}/bids/get-all-bids", r.GetBidByStatusHandler)
 
 	r.defaultHandler.Post("/api/v1/tournaments/{id}/bids/create-bid", r.CreateBidHandler)
+
+	r.defaultHandler.Patch("/api/v1/tournaments/{id}/bids/{bid_id}/change-bid-status", r.UpdateBidStatusHandler)
 	// ...
 }
 
@@ -121,7 +124,7 @@ func (b *BidRouter) CreateBidHandler(w http.ResponseWriter, r *http.Request) {
 	err := render.DecodeJSON(r.Body, &request)
 	if err != nil {
 		b.logger.Error("request body is empty", slogerr.Error(err))
-
+		response.JSON(w, http.StatusBadRequest, "request body is empty")
 		return
 	}
 
@@ -149,6 +152,57 @@ func (b *BidRouter) CreateBidHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if strings.Contains(err.Error(), "failed") {
 			response.JSON(w, http.StatusInternalServerError, err)
+		} else {
+			response.JSON(w, http.StatusBadRequest, err.Error())
+		}
+
+		return
+	}
+}
+
+func (b *BidRouter) UpdateBidStatusHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
+	defer cancel()
+
+	tournamentId := chi.URLParam(r, "id")
+	if tournamentId == "" {
+		b.logger.Error("tournament id param is empty")
+		response.JSON(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+
+	bidId := chi.URLParam(r, "bid_id")
+	if bidId == "" {
+		b.logger.Error("bid id param is empty")
+		response.JSON(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+
+	var request dtos.UpdateBidStatusRequest
+
+	err := render.DecodeJSON(r.Body, &request)
+	if err != nil {
+		b.logger.Error("request body is empty", slogerr.Error(err))
+		response.JSON(w, http.StatusBadRequest, "request body is empty")
+		return
+	}
+
+	errs := validate.ValidateRequestBody(request)
+	if errs != nil {
+		response.JSON(w, http.StatusBadRequest, errs)
+		return
+	}
+
+	request.BidId, err = uuid.Parse(bidId)
+	if err != nil {
+		b.logger.Error("bid id conversion", slogerr.Error(err))
+		return
+	}
+
+	err = b.usecase.UpdateStatus(ctx, request)
+	if err != nil {
+		if strings.Contains(err.Error(), "failed") {
+			response.JSON(w, http.StatusInternalServerError, err.Error())
 		} else {
 			response.JSON(w, http.StatusBadRequest, err.Error())
 		}
