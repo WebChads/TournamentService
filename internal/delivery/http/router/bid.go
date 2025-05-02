@@ -63,8 +63,8 @@ func ConfigureBidRouter(r *BidRouter) {
 // @Tags Bids
 // @Accept json
 // @Produce json
-// @Param id path uuid true "Tournament Id"
-// @Param bid-status query uuid true "Bid status"
+// @Param id path string true "Tournament Id" format(uuid)
+// @Param bid-status query string true "Bid status" format(int)
 // @Success 200 {object} []dtos.GetBidResponse "Successfully get list of needed bids"
 // @Failure 400 {object} dtos.Response "tournament id param is empty"
 // @Failure 400 {object} dtos.Response "bid status query param is empty"
@@ -131,7 +131,7 @@ func (b *BidRouter) GetBidByStatusHandler(w http.ResponseWriter, r *http.Request
 // @Tags Bids
 // @Accept json
 // @Produce json
-// @Param id path uuid true "Tournament Id"
+// @Param id path string true "Tournament Id" format(uuid)
 // @Param request body dtos.CreateBidRequest true "Dto with bid information"
 // @Success 200 "Successfully create new bid"
 // @Failure 400 {object} dtos.Response "Tournament id param is empty"
@@ -192,12 +192,12 @@ func (b *BidRouter) CreateBidHandler(w http.ResponseWriter, r *http.Request) {
 
 // UpdateBidStatusHandler godoc
 // @Title UpdateBidStatusHandler
-// @Summary Update bit status to another one
+// @Summary Update bid status to another one
 // @Tags Bids
 // @Accept json
 // @Produce json
-// @Param id path uuid true "Tournament Id"
-// @Param bid_id path uuid true "Bid Id"
+// @Param id path string true "Tournament Id" format(uuid)
+// @Param bid_id path string true "Bid Id" format(uuid)
 // @Success 200 "Successfully update specific bid"
 // @Failure 400 {object} dtos.Response "Tournament id param is empty"
 // @Failure 400 {object} dtos.Response "Bid id param is empty"
@@ -263,8 +263,8 @@ func (b *BidRouter) UpdateBidStatusHandler(w http.ResponseWriter, r *http.Reques
 // @Tags Bids
 // @Accept json
 // @Produce json
-// @Param id path uuid true "Tournament Id"
-// @Param bid_id path uuid true "Bid Id"
+// @Param id path string true "Tournament Id" format(uuid)
+// @Param bid_id path string true "Bid Id" format(uuid)
 // @Success 200 "Successfully delete specific bid"
 // @Failure 400 {object} dtos.Response "Tournament id param is empty"
 // @Failure 400 {object} dtos.Response "Bid id param is empty"

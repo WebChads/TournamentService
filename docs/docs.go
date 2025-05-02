@@ -38,6 +38,14 @@ const docTemplate = `{
                 "summary": "Create new bid",
                 "parameters": [
                     {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Tournament Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "Dto with bid information",
                         "name": "request",
                         "in": "body",
@@ -145,7 +153,25 @@ const docTemplate = `{
                 "tags": [
                     "Bids"
                 ],
-                "summary": "Update bit status to another one",
+                "summary": "Update bid status to another one",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Tournament Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Bid Id",
+                        "name": "bid_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successfully update specific bid"
