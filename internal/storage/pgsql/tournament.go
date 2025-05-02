@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/WebChads/TournamentService/internal/models/dtos"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -21,10 +22,11 @@ func NewTournamentRepository(db *sqlx.DB) *TournamentRepository {
 
 // Database inner structure
 type Tournament struct {
-	Id             int       `db:"id"`
+	Id             uuid.UUID `db:"id"`
 	Name           string    `db:"name"`
 	TournamentDate time.Time `db:"tournament_date"`
 	MatchesAmount  int       `db:"matches_amount"`
+	UserId         uuid.UUID `db:"user_id"`
 }
 
 func newTournament(t dtos.CreateTournamentRequest) Tournament {
@@ -32,15 +34,17 @@ func newTournament(t dtos.CreateTournamentRequest) Tournament {
 	tournamentDate, _ := time.Parse("02-01-2006 15:04:05", t.TournamentDate)
 
 	return Tournament{
+		Id:             uuid.New(),
 		Name:           t.Name,
 		TournamentDate: tournamentDate,
 		MatchesAmount:  t.MatchesAmount,
+		UserId:         t.UserId,
 	}
 }
 
-func (r *TournamentRepository) SelectById(ctx context.Context, tournamentId int) (*dtos.GetTournamentByIdResponse, error) {
+func (r *TournamentRepository) SelectById(ctx context.Context, tournamentId uuid.UUID) (*dtos.GetTournamentByIdResponse, error) {
 	query := `
-		SELECT name, tournament_date, matches_amount
+		SELECT name, tournament_date, matches_amount, user_id
 		FROM tournaments WHERE id = :id
 	`
 
@@ -68,9 +72,39 @@ func (r *TournamentRepository) SelectById(ctx context.Context, tournamentId int)
 		Name:           tournament.Name,
 		TournamentDate: tournament.TournamentDate.Format("02-01-2006 15:04:05"),
 		MatchesAmount:  tournament.MatchesAmount,
+		UserId:         tournament.UserId,
 	}
 
 	return response, nil
+}
+
+func (r *TournamentRepository) SelectByName(
+	ctx context.Context, tournamentName string,
+) ([]dtos.GetTournamentByIdResponse, error) {
+	query := `
+		SELECT name, tournament_date, matches_amount, user_id
+		FROM tournaments WHERE LOWER(name) LIKE $1
+	`
+
+	var tournaments []Tournament
+	err := r.db.SelectContext(ctx, &tournaments, query, "%"+tournamentName+"%")
+	if err != nil {
+		return nil, errors.New("failed to select tournaments: " + err.Error())
+	}
+
+	var responseTournaments []dtos.GetTournamentByIdResponse
+	for _, tournament := range tournaments {
+		response := dtos.GetTournamentByIdResponse{
+			Name:           tournament.Name,
+			TournamentDate: tournament.TournamentDate.Format("02-01-2006 15:04:05"),
+			MatchesAmount:  tournament.MatchesAmount,
+			UserId:         tournament.UserId,
+		}
+
+		responseTournaments = append(responseTournaments, response)
+	}
+
+	return responseTournaments, nil
 }
 
 func (r *TournamentRepository) Insert(ctx context.Context, req dtos.CreateTournamentRequest) error {
@@ -89,10 +123,12 @@ func (r *TournamentRepository) Insert(ctx context.Context, req dtos.CreateTourna
 
 	query := `
 		INSERT INTO tournaments (
+			id,
 			name,
 			tournament_date,
-			matches_amount
-	    ) VALUES (:name, :tournament_date, :matches_amount)
+			matches_amount,
+			user_id
+	    ) VALUES (:id, :name, :tournament_date, :matches_amount, :user_id)
 	`
 
 	_, err = tx.NamedExecContext(ctx, query, tournament)
@@ -109,7 +145,7 @@ func (r *TournamentRepository) Insert(ctx context.Context, req dtos.CreateTourna
 }
 
 func (r *TournamentRepository) UpdateById(
-	ctx context.Context, req dtos.CreateTournamentRequest, tournamentId int,
+	ctx context.Context, req dtos.CreateTournamentRequest, tournamentId uuid.UUID,
 ) error {
 	tournament := newTournament(req)
 	tournament.Id = tournamentId
@@ -129,7 +165,8 @@ func (r *TournamentRepository) UpdateById(
 		UPDATE tournaments SET
 			name = :name,
 			tournament_date = :tournament_date,
-			matches_amount = :matches_amount
+			matches_amount = :matches_amount,
+			user_id = :user_id
 	    WHERE id = :id
 	`
 
@@ -146,7 +183,7 @@ func (r *TournamentRepository) UpdateById(
 	return nil
 }
 
-func (r *TournamentRepository) DeleteById(ctx context.Context, tournamentId int) error {
+func (r *TournamentRepository) DeleteById(ctx context.Context, tournamentId uuid.UUID) error {
 	// Start transaction
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {

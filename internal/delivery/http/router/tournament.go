@@ -17,10 +17,12 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator"
+	"github.com/google/uuid"
 )
 
 type TournamentUsecase interface {
 	GetById(ctx context.Context, tournamentId string) (*dtos.GetTournamentByIdResponse, error)
+	GetByName(ctx context.Context, tournamentId string) ([]dtos.GetTournamentByIdResponse, error)
 	Create(ctx context.Context, dto dtos.CreateTournamentRequest) error
 	UpdateById(ctx context.Context, request_body io.ReadCloser, tournamentId string) error
 	DeleteById(ctx context.Context, tournamentId string) error
@@ -50,8 +52,12 @@ func ConfigureTournamentRouter(r *TournamentRouter) {
 	// r.defaultHandler.Use(auth.AuthMiddleware)
 
 	r.defaultHandler.Get("/api/v1/tournament/get-one-tournament/{id}", r.GetTournamentByIdHandler)
+	r.defaultHandler.Get("/api/v1/tournament/get-tournaments/{name}", r.GetTournamentByNameHandler)
+
 	r.defaultHandler.Post("/api/v1/tournament/create-tournament", r.CreateTournamentHandler)
+
 	r.defaultHandler.Patch("/api/v1/tournament/update-tournament/{id}", r.UpdateTournamentByIdHandler)
+
 	r.defaultHandler.Delete("/api/v1/tournament/delete-tournament/{id}", r.DeleteTournamentByIdHandler)
 	// ...
 }
@@ -63,7 +69,6 @@ func (a *TournamentRouter) GetTournamentByIdHandler(w http.ResponseWriter, r *ht
 	tournamentId := chi.URLParam(r, "id")
 	if tournamentId == "" {
 		a.logger.Error("tournament id param is empty")
-
 		response.JSON(w, http.StatusBadRequest, "invalid request")
 		return
 	}
@@ -80,6 +85,31 @@ func (a *TournamentRouter) GetTournamentByIdHandler(w http.ResponseWriter, r *ht
 	}
 
 	response.JSON(w, http.StatusOK, tournament)
+}
+
+func (a *TournamentRouter) GetTournamentByNameHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
+	defer cancel()
+
+	tournamentName := chi.URLParam(r, "name")
+	if tournamentName == "" {
+		a.logger.Error("tournament name param is empty")
+		response.JSON(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+
+	tournaments, err := a.usecase.GetByName(ctx, tournamentName)
+	if err != nil {
+		if strings.Contains(err.Error(), "failed") {
+			response.JSON(w, http.StatusInternalServerError, err.Error())
+		} else {
+			response.JSON(w, http.StatusBadRequest, err.Error())
+		}
+
+		return
+	}
+
+	response.JSON(w, http.StatusOK, tournaments)
 }
 
 func (t *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *http.Request) {
@@ -102,6 +132,9 @@ func (t *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *htt
 		response.JSON(w, http.StatusBadRequest, "failed to decode request body")
 		return
 	}
+
+	// Use mock data just for now
+	request.UserId = uuid.New()
 
 	// Validate request fields
 	errs := validateRequestBody(request)
@@ -160,7 +193,6 @@ func (t *TournamentRouter) UpdateTournamentByIdHandler(w http.ResponseWriter, r 
 	tournamentId := chi.URLParam(r, "id")
 	if tournamentId == "" {
 		t.logger.Error("tournament id param is empty")
-
 		response.JSON(w, http.StatusBadRequest, "invalid request")
 		return
 	}
@@ -184,7 +216,6 @@ func (t *TournamentRouter) DeleteTournamentByIdHandler(w http.ResponseWriter, r 
 	tournamentId := chi.URLParam(r, "id")
 	if tournamentId == "" {
 		t.logger.Error("tournament id param is empty")
-
 		response.JSON(w, http.StatusBadRequest, "invalid request")
 		return
 	}
