@@ -42,7 +42,7 @@ func newTournament(t dtos.CreateTournamentRequest) Tournament {
 	}
 }
 
-func (r *TournamentRepository) SelectById(ctx context.Context, tournamentId uuid.UUID) (*dtos.GetTournamentByIdResponse, error) {
+func (r *TournamentRepository) SelectById(ctx context.Context, tournamentId uuid.UUID) (*dtos.GetTournamentResponse, error) {
 	query := `
 		SELECT name, tournament_date, matches_amount, user_id
 		FROM tournaments WHERE id = :id
@@ -68,7 +68,7 @@ func (r *TournamentRepository) SelectById(ctx context.Context, tournamentId uuid
 		return nil, errors.New("failed to get tournament: " + err.Error())
 	}
 
-	response := &dtos.GetTournamentByIdResponse{
+	response := &dtos.GetTournamentResponse{
 		Name:           tournament.Name,
 		TournamentDate: tournament.TournamentDate.Format("02-01-2006 15:04:05"),
 		MatchesAmount:  tournament.MatchesAmount,
@@ -80,7 +80,7 @@ func (r *TournamentRepository) SelectById(ctx context.Context, tournamentId uuid
 
 func (r *TournamentRepository) SelectByName(
 	ctx context.Context, tournamentName string,
-) ([]dtos.GetTournamentByIdResponse, error) {
+) ([]dtos.GetTournamentResponse, error) {
 	query := `
 		SELECT name, tournament_date, matches_amount, user_id
 		FROM tournaments WHERE LOWER(name) LIKE $1
@@ -92,9 +92,38 @@ func (r *TournamentRepository) SelectByName(
 		return nil, errors.New("failed to select tournaments: " + err.Error())
 	}
 
-	var responseTournaments []dtos.GetTournamentByIdResponse
+	var responseTournaments []dtos.GetTournamentResponse
 	for _, tournament := range tournaments {
-		response := dtos.GetTournamentByIdResponse{
+		response := dtos.GetTournamentResponse{
+			Name:           tournament.Name,
+			TournamentDate: tournament.TournamentDate.Format("02-01-2006 15:04:05"),
+			MatchesAmount:  tournament.MatchesAmount,
+			UserId:         tournament.UserId,
+		}
+
+		responseTournaments = append(responseTournaments, response)
+	}
+
+	return responseTournaments, nil
+}
+
+func (r *TournamentRepository) SelectByOwn(
+	ctx context.Context, userId uuid.UUID,
+) ([]dtos.GetTournamentResponse, error) {
+	query := `
+		SELECT name, tournament_date, matches_amount, user_id
+		FROM tournaments WHERE user_id = $1
+	`
+
+	var tournaments []Tournament
+	err := r.db.SelectContext(ctx, &tournaments, query, userId)
+	if err != nil {
+		return nil, errors.New("failed to select tournaments: " + err.Error())
+	}
+
+	var responseTournaments []dtos.GetTournamentResponse
+	for _, tournament := range tournaments {
+		response := dtos.GetTournamentResponse{
 			Name:           tournament.Name,
 			TournamentDate: tournament.TournamentDate.Format("02-01-2006 15:04:05"),
 			MatchesAmount:  tournament.MatchesAmount,

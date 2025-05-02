@@ -9,7 +9,7 @@ type CreateTournamentRequest struct {
 	UserId         uuid.UUID `json:"user_id"`
 }
 
-type GetTournamentByIdResponse struct {
+type GetTournamentResponse struct {
 	Name           string    `json:"name"`
 	TournamentDate string    `json:"tournament_date"`
 	MatchesAmount  int       `json:"matches_amount"`

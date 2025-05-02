@@ -23,7 +23,7 @@ func NewTournamentUsecase(r TournamentRepository, l *slog.Logger) *TournamentUse
 	}
 }
 
-func (u *TournamentUsecase) GetById(ctx context.Context, tournamentId string) (*dtos.GetTournamentByIdResponse, error) {
+func (u *TournamentUsecase) GetById(ctx context.Context, tournamentId string) (*dtos.GetTournamentResponse, error) {
 	id, err := uuid.Parse(tournamentId)
 	if err != nil {
 		u.logger.Error("uuid conversion error", slogerr.Error(err))
@@ -39,8 +39,18 @@ func (u *TournamentUsecase) GetById(ctx context.Context, tournamentId string) (*
 	return tournament, nil
 }
 
-func (u *TournamentUsecase) GetByName(ctx context.Context, tournamentName string) ([]dtos.GetTournamentByIdResponse, error) {
+func (u *TournamentUsecase) GetByName(ctx context.Context, tournamentName string) ([]dtos.GetTournamentResponse, error) {
 	tournaments, err := u.repository.SelectByName(ctx, tournamentName)
+	if err != nil {
+		u.logger.Error("get tournament by name", slogerr.Error(err))
+		return nil, err
+	}
+
+	return tournaments, nil
+}
+
+func (u *TournamentUsecase) GetByOwn(ctx context.Context, userId uuid.UUID) ([]dtos.GetTournamentResponse, error) {
+	tournaments, err := u.repository.SelectByOwn(ctx, userId)
 	if err != nil {
 		u.logger.Error("get tournament by name", slogerr.Error(err))
 		return nil, err

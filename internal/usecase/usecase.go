@@ -10,8 +10,9 @@ import (
 )
 
 type TournamentRepository interface {
-	SelectById(ctx context.Context, tournamentId uuid.UUID) (*dtos.GetTournamentByIdResponse, error)
-	SelectByName(ctx context.Context, tournamentName string) ([]dtos.GetTournamentByIdResponse, error)
+	SelectById(ctx context.Context, tournamentId uuid.UUID) (*dtos.GetTournamentResponse, error)
+	SelectByName(ctx context.Context, tournamentName string) ([]dtos.GetTournamentResponse, error)
+	SelectByOwn(ctx context.Context, userId uuid.UUID) ([]dtos.GetTournamentResponse, error)
 	Insert(ctx context.Context, tournament dtos.CreateTournamentRequest) error
 	UpdateById(ctx context.Context, req dtos.CreateTournamentRequest, tournamentId uuid.UUID) error
 	DeleteById(ctx context.Context, tournamentId uuid.UUID) error

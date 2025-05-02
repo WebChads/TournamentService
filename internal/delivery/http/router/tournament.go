@@ -21,8 +21,9 @@ import (
 )
 
 type TournamentUsecase interface {
-	GetById(ctx context.Context, tournamentId string) (*dtos.GetTournamentByIdResponse, error)
-	GetByName(ctx context.Context, tournamentId string) ([]dtos.GetTournamentByIdResponse, error)
+	GetById(ctx context.Context, tournamentId string) (*dtos.GetTournamentResponse, error)
+	GetByName(ctx context.Context, tournamentId string) ([]dtos.GetTournamentResponse, error)
+	GetByOwn(ctx context.Context, userId uuid.UUID) ([]dtos.GetTournamentResponse, error)
 	Create(ctx context.Context, dto dtos.CreateTournamentRequest) error
 	UpdateById(ctx context.Context, request_body io.ReadCloser, tournamentId string) error
 	DeleteById(ctx context.Context, tournamentId string) error
@@ -53,6 +54,7 @@ func ConfigureTournamentRouter(r *TournamentRouter) {
 
 	r.defaultHandler.Get("/api/v1/tournament/get-one-tournament/{id}", r.GetTournamentByIdHandler)
 	r.defaultHandler.Get("/api/v1/tournament/get-tournaments/{name}", r.GetTournamentByNameHandler)
+	r.defaultHandler.Get("/api/v1/tournament/get-tournaments", r.GetTournamentByOwnHandler)
 
 	r.defaultHandler.Post("/api/v1/tournament/create-tournament", r.CreateTournamentHandler)
 
@@ -112,6 +114,33 @@ func (a *TournamentRouter) GetTournamentByNameHandler(w http.ResponseWriter, r *
 	response.JSON(w, http.StatusOK, tournaments)
 }
 
+func (a *TournamentRouter) GetTournamentByOwnHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
+	defer cancel()
+
+	// Get user id from request context (auth middleware)
+	// request.UserId = r.Context().Value("user_id").(uuid.UUID)
+
+	// Use mock data to test just for now
+	userId, err := uuid.Parse("a8c75926-7a6e-4263-90f0-aecd383f8242")
+	if err != nil {
+		return
+	}
+
+	tournaments, err := a.usecase.GetByOwn(ctx, userId)
+	if err != nil {
+		if strings.Contains(err.Error(), "failed") {
+			response.JSON(w, http.StatusInternalServerError, err.Error())
+		} else {
+			response.JSON(w, http.StatusBadRequest, err.Error())
+		}
+
+		return
+	}
+
+	response.JSON(w, http.StatusOK, tournaments)
+}
+
 func (t *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
@@ -132,6 +161,9 @@ func (t *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *htt
 		response.JSON(w, http.StatusBadRequest, "failed to decode request body")
 		return
 	}
+
+	// Get user id from request context (auth middleware)
+	// request.UserId = r.Context().Value("user_id").(uuid.UUID)
 
 	// Use mock data just for now
 	request.UserId = uuid.New()
