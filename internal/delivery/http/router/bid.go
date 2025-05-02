@@ -80,7 +80,7 @@ func (b *BidRouter) GetBidByStatusHandler(w http.ResponseWriter, r *http.Request
 	// request.UserId = r.Context().Value("user_id").(uuid.UUID)
 
 	// Use mock data to test just for now
-	userId, err := uuid.Parse("15563154-959a-4bb0-97d0-55449a812998")
+	userId, err := uuid.Parse("71ec685c-c366-40af-a158-4d9dc4c45892")
 	if err != nil {
 		b.logger.Error("user id conversion", slogerr.Error(err))
 		return

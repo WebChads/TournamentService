@@ -45,7 +45,7 @@ func (r *BidRepository) SelectByStatus(
 	ctx context.Context, req dtos.GetBidRequest,
 ) ([]dtos.GetBidResponse, error) {
 	query := `
-		SELECT full_name, age, avatar_url, bid_status
+		SELECT bid_id, full_name, age, avatar_url, bid_status
 		FROM bids WHERE user_id = $1 AND bid_status = $2
 	`
 
@@ -58,8 +58,9 @@ func (r *BidRepository) SelectByStatus(
 	var responseBids []dtos.GetBidResponse
 	for _, bid := range bids {
 		response := dtos.GetBidResponse{
-			FullName: bid.FullName,
-			Age: bid.Age,
+			BidId:     bid.BidId,
+			FullName:  bid.FullName,
+			Age:       bid.Age,
 			AvatarUrl: bid.AvatarUrl,
 			BidStatus: bid.BidStatus,
 		}

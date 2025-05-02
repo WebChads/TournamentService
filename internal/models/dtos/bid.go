@@ -16,8 +16,9 @@ type GetBidRequest struct {
 }
 
 type GetBidResponse struct {
-	FullName  string `json:"full_name"`
-	Age       int    `json:"age"`
-	AvatarUrl string `json:"avatar_url"`
-	BidStatus int    `json:"bid_status"`
+	BidId     uuid.UUID `json:"bid_id"`
+	FullName  string    `json:"full_name"`
+	Age       int       `json:"age"`
+	AvatarUrl string    `json:"avatar_url"`
+	BidStatus int       `json:"bid_status"`
 }
