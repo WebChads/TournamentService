@@ -12,7 +12,7 @@ require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/WebChads/AccountService v0.0.0-20250418175149-5875f7d8a1ce // indirect
-	github.com/WebChads/AccountService/pkg/pretty_logger v0.0.0-20250429201528-62df91a7be06 // indirect
+	github.com/WebChads/AccountService/pkg/pretty_logger v0.0.0-20250430123952-32cd7a3dc2d8 // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect

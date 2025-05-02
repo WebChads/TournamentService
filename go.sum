@@ -7,6 +7,8 @@ github.com/WebChads/AccountService v0.0.0-20250418175149-5875f7d8a1ce h1:/1H1Pgv
 github.com/WebChads/AccountService v0.0.0-20250418175149-5875f7d8a1ce/go.mod h1:I/dXaBqlF59lIBHQNZAak2stgjBqAmwo53jRpJeW8OU=
 github.com/WebChads/AccountService/pkg/pretty_logger v0.0.0-20250429201528-62df91a7be06 h1:NJhKs/6AsYA4EfUDH18roM6MOOcvrvK4ncz3S4iwuf0=
 github.com/WebChads/AccountService/pkg/pretty_logger v0.0.0-20250429201528-62df91a7be06/go.mod h1:8lPSy/ab2rIMVtFtRN5fAv+5ddSUVka9Gr3kFhAaCS0=
+github.com/WebChads/AccountService/pkg/pretty_logger v0.0.0-20250430123952-32cd7a3dc2d8 h1:+d07pvvgICiKQvk1a30WTa/5fH41T8stBRWFqe5ekAo=
+github.com/WebChads/AccountService/pkg/pretty_logger v0.0.0-20250430123952-32cd7a3dc2d8/go.mod h1:8lPSy/ab2rIMVtFtRN5fAv+5ddSUVka9Gr3kFhAaCS0=
 github.com/ajg/form v1.5.1 h1:t9c7v8JUKu/XxOGBU0yjNpaMloxGEJhUkqFRq0ibGeU=
 github.com/ajg/form v1.5.1/go.mod h1:uL1WgH+h2mgNtvBq0339dVnzXdBETtL2LeUXaIv25UY=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
