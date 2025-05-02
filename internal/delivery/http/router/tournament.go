@@ -124,6 +124,7 @@ func (t *TournamentRouter) GetTournamentByOwnHandler(w http.ResponseWriter, r *h
 	userId, err := uuid.Parse("a8c75926-7a6e-4263-90f0-aecd383f8242")
 	if err != nil {
 		t.logger.Error("user id conversion", slogerr.Error(err))
+		response.JSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 

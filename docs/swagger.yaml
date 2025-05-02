@@ -1,0 +1,149 @@
+basePath: /api/v1
+definitions:
+  dtos.CreateBidRequest:
+    properties:
+      age:
+        type: integer
+      avatar_url:
+        type: string
+      full_name:
+        type: string
+      tournament_id:
+        type: string
+      user_id:
+        type: string
+    required:
+    - age
+    - full_name
+    type: object
+  dtos.GetBidResponse:
+    properties:
+      age:
+        type: integer
+      avatar_url:
+        type: string
+      bid_id:
+        type: string
+      bid_status:
+        type: integer
+      full_name:
+        type: string
+    type: object
+  dtos.Response:
+    properties:
+      message: {}
+      status:
+        type: integer
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:5000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /api/v1/tournaments/{id}/bids/{bid_id}/cancel-bid:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully delete specific bid
+        "400":
+          description: Bid id param is empty
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Happened internal error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Delete bit from the bid list
+      tags:
+      - Bids
+  /api/v1/tournaments/{id}/bids/{bid_id}/change-bid-status:
+    patch:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully update specific bid
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Happened internal error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Update bit status to another one
+      tags:
+      - Bids
+  /api/v1/tournaments/{id}/bids/create-bid:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Dto with bid information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateBidRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully create new bid
+        "400":
+          description: Request body is empty
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Happened internal error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Create new bid
+      tags:
+      - Bids
+  /api/v1/tournaments/{id}/bids/get-all-bids:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get list of needed bids
+          schema:
+            items:
+              $ref: '#/definitions/dtos.GetBidResponse'
+            type: array
+        "400":
+          description: bid status query param is empty
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Happened internal error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get bid by specific bid status
+      tags:
+      - Bids
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

@@ -57,6 +57,19 @@ func ConfigureBidRouter(r *BidRouter) {
 	r.defaultHandler.Delete("/api/v1/tournaments/{id}/bids/{bid_id}/cancel-bid", r.CancelBidHandler)
 }
 
+// GetBidByStatusHandler godoc
+// @Title GetBidByStatusHandler
+// @Summary Get bid by specific bid status
+// @Tags Bids
+// @Accept json
+// @Produce json
+// @Param id path uuid true "Tournament Id"
+// @Param bid-status query uuid true "Bid status"
+// @Success 200 {object} []dtos.GetBidResponse "Successfully get list of needed bids"
+// @Failure 400 {object} dtos.Response "tournament id param is empty"
+// @Failure 400 {object} dtos.Response "bid status query param is empty"
+// @Failure 500 {object} dtos.Response "Happened internal error"
+// @Router /api/v1/tournaments/{id}/bids/get-all-bids [get]
 func (b *BidRouter) GetBidByStatusHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
@@ -78,6 +91,7 @@ func (b *BidRouter) GetBidByStatusHandler(w http.ResponseWriter, r *http.Request
 	bidStatusInt, err := strconv.Atoi(bidStatus)
 	if err != nil {
 		b.logger.Error("bid status conversion error", slogerr.Error(err))
+		response.JSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -88,6 +102,7 @@ func (b *BidRouter) GetBidByStatusHandler(w http.ResponseWriter, r *http.Request
 	userId, err := uuid.Parse("71ec685c-c366-40af-a158-4d9dc4c45892")
 	if err != nil {
 		b.logger.Error("user id conversion", slogerr.Error(err))
+		response.JSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -110,6 +125,19 @@ func (b *BidRouter) GetBidByStatusHandler(w http.ResponseWriter, r *http.Request
 	response.JSON(w, http.StatusOK, bids)
 }
 
+// CreateBidHandler godoc
+// @Title CreateBidHandler
+// @Summary Create new bid
+// @Tags Bids
+// @Accept json
+// @Produce json
+// @Param id path uuid true "Tournament Id"
+// @Param request body dtos.CreateBidRequest true "Dto with bid information"
+// @Success 200 "Successfully create new bid"
+// @Failure 400 {object} dtos.Response "Tournament id param is empty"
+// @Failure 400 {object} dtos.Response "Request body is empty"
+// @Failure 500 {object} dtos.Response "Happened internal error"
+// @Router /api/v1/tournaments/{id}/bids/create-bid [post]
 func (b *BidRouter) CreateBidHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
@@ -162,6 +190,21 @@ func (b *BidRouter) CreateBidHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// UpdateBidStatusHandler godoc
+// @Title UpdateBidStatusHandler
+// @Summary Update bit status to another one
+// @Tags Bids
+// @Accept json
+// @Produce json
+// @Param id path uuid true "Tournament Id"
+// @Param bid_id path uuid true "Bid Id"
+// @Success 200 "Successfully update specific bid"
+// @Failure 400 {object} dtos.Response "Tournament id param is empty"
+// @Failure 400 {object} dtos.Response "Bid id param is empty"
+// @Failure 400 {object} dtos.Response "Request body is empty"
+// @Failure 400 {object} dtos.Response "Validation error"
+// @Failure 500 {object} dtos.Response "Happened internal error"
+// @Router /api/v1/tournaments/{id}/bids/{bid_id}/change-bid-status [patch]
 func (b *BidRouter) UpdateBidStatusHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
@@ -198,6 +241,7 @@ func (b *BidRouter) UpdateBidStatusHandler(w http.ResponseWriter, r *http.Reques
 	request.BidId, err = uuid.Parse(bidId)
 	if err != nil {
 		b.logger.Error("bid id conversion", slogerr.Error(err))
+		response.JSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -213,6 +257,19 @@ func (b *BidRouter) UpdateBidStatusHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// CancelBidHandler godoc
+// @Title CancelBidHandler
+// @Summary Delete bit from the bid list
+// @Tags Bids
+// @Accept json
+// @Produce json
+// @Param id path uuid true "Tournament Id"
+// @Param bid_id path uuid true "Bid Id"
+// @Success 200 "Successfully delete specific bid"
+// @Failure 400 {object} dtos.Response "Tournament id param is empty"
+// @Failure 400 {object} dtos.Response "Bid id param is empty"
+// @Failure 500 {object} dtos.Response "Happened internal error"
+// @Router /api/v1/tournaments/{id}/bids/{bid_id}/cancel-bid [delete]
 func (b *BidRouter) CancelBidHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
@@ -234,6 +291,7 @@ func (b *BidRouter) CancelBidHandler(w http.ResponseWriter, r *http.Request) {
 	bidUUID, err := uuid.Parse(bidId)
 	if err != nil {
 		b.logger.Error("bid id conversion", slogerr.Error(err))
+		response.JSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
