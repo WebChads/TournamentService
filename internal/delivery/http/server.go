@@ -51,10 +51,13 @@ func InitRouter(config *config.ServerConfig, logger *slog.Logger, db *sqlx.DB) h
 	// Add all routers here
 	tournamentUsecase := usecase.NewTournamentUsecase(repos.Tournament, logger)
 	tournamentRouter := router.NewTournamentRouter(rout, config, logger, tournamentUsecase)
+	bidUsecase := usecase.NewBidUsecase(repos.Bid, logger)
+	bidRouter := router.NewBidRouter(rout, config, logger, bidUsecase)
 	// ...
 
 	// Configure routers
 	router.ConfigureTournamentRouter(tournamentRouter)
+	router.ConfigureBidRouter(bidRouter)
 	// ...
 
 	// Serve Swagger UI

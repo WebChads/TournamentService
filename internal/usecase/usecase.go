@@ -18,15 +18,21 @@ type TournamentRepository interface {
 	DeleteById(ctx context.Context, tournamentId uuid.UUID) error
 }
 
+type BidRepository interface {
+	Insert(ctx context.Context, tournament dtos.CreateBidRequest) error
+}
+
 // All service repositories
 type Repositories struct {
 	Tournament TournamentRepository
+	Bid        BidRepository
 	// ...
 }
 
 func NewRepositories(db *sqlx.DB) *Repositories {
 	return &Repositories{
 		Tournament: storage.NewTournamentRepository(db),
+		Bid: storage.NewBidRepository(db),
 		// ...
 	}
 }

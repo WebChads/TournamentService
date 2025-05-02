@@ -85,11 +85,6 @@ func (u *TournamentUsecase) UpdateById(
 		return err
 	}
 
-	slog.Info("tournament name", slog.Any("name", tournament.Name))
-	slog.Info("tournament date", slog.Any("tournament_date", tournament.TournamentDate))
-	slog.Info("tournament matches", slog.Any("matches_amount", tournament.MatchesAmount))
-	slog.Info("tournament user id", slog.Any("user_id", tournament.UserId))
-
 	err = render.DecodeJSON(request_body, &tournament)
 	if err != nil {
 		u.logger.Error("request body is empty", slogerr.Error(err))

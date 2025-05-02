@@ -3,7 +3,6 @@ package router
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -14,9 +13,9 @@ import (
 	"github.com/WebChads/TournamentService/internal/models/dtos"
 	response "github.com/WebChads/TournamentService/internal/pkg/api"
 	slogerr "github.com/WebChads/TournamentService/internal/pkg/logger"
+	validate "github.com/WebChads/TournamentService/internal/pkg/validator"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	"github.com/go-playground/validator"
 	"github.com/google/uuid"
 )
 
@@ -64,18 +63,18 @@ func ConfigureTournamentRouter(r *TournamentRouter) {
 	// ...
 }
 
-func (a *TournamentRouter) GetTournamentByIdHandler(w http.ResponseWriter, r *http.Request) {
+func (t *TournamentRouter) GetTournamentByIdHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
 
 	tournamentId := chi.URLParam(r, "id")
 	if tournamentId == "" {
-		a.logger.Error("tournament id param is empty")
+		t.logger.Error("tournament id param is empty")
 		response.JSON(w, http.StatusBadRequest, "invalid request")
 		return
 	}
 
-	tournament, err := a.usecase.GetById(ctx, tournamentId)
+	tournament, err := t.usecase.GetById(ctx, tournamentId)
 	if err != nil {
 		if strings.Contains(err.Error(), "failed") {
 			response.JSON(w, http.StatusInternalServerError, err.Error())
@@ -89,18 +88,18 @@ func (a *TournamentRouter) GetTournamentByIdHandler(w http.ResponseWriter, r *ht
 	response.JSON(w, http.StatusOK, tournament)
 }
 
-func (a *TournamentRouter) GetTournamentByNameHandler(w http.ResponseWriter, r *http.Request) {
+func (t *TournamentRouter) GetTournamentByNameHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
 
 	tournamentName := chi.URLParam(r, "name")
 	if tournamentName == "" {
-		a.logger.Error("tournament name param is empty")
+		t.logger.Error("tournament name param is empty")
 		response.JSON(w, http.StatusBadRequest, "invalid request")
 		return
 	}
 
-	tournaments, err := a.usecase.GetByName(ctx, tournamentName)
+	tournaments, err := t.usecase.GetByName(ctx, tournamentName)
 	if err != nil {
 		if strings.Contains(err.Error(), "failed") {
 			response.JSON(w, http.StatusInternalServerError, err.Error())
@@ -114,7 +113,7 @@ func (a *TournamentRouter) GetTournamentByNameHandler(w http.ResponseWriter, r *
 	response.JSON(w, http.StatusOK, tournaments)
 }
 
-func (a *TournamentRouter) GetTournamentByOwnHandler(w http.ResponseWriter, r *http.Request) {
+func (t *TournamentRouter) GetTournamentByOwnHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*100)
 	defer cancel()
 
@@ -127,7 +126,7 @@ func (a *TournamentRouter) GetTournamentByOwnHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	tournaments, err := a.usecase.GetByOwn(ctx, userId)
+	tournaments, err := t.usecase.GetByOwn(ctx, userId)
 	if err != nil {
 		if strings.Contains(err.Error(), "failed") {
 			response.JSON(w, http.StatusInternalServerError, err.Error())
@@ -169,7 +168,7 @@ func (t *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *htt
 	request.UserId = uuid.New()
 
 	// Validate request fields
-	errs := validateRequestBody(request)
+	errs := validate.ValidateRequestBody(request)
 	if errs != nil {
 		response.JSON(w, http.StatusBadRequest, errs)
 		return
@@ -187,35 +186,6 @@ func (t *TournamentRouter) CreateTournamentHandler(w http.ResponseWriter, r *htt
 
 		return
 	}
-}
-
-func validateRequestBody(request any) map[string]any {
-	var errs map[string]any
-
-	err := validator.New().Struct(request)
-	if err != nil {
-		var errors []string
-		if validationErrors, ok := err.(validator.ValidationErrors); ok {
-			for _, fieldErr := range validationErrors {
-				errors = append(errors, getValidationMsg(fieldErr))
-			}
-		}
-
-		errs = map[string]any{"errors": errors}
-	}
-
-	return errs
-}
-
-func getValidationMsg(fe validator.FieldError) string {
-	switch fe.Tag() {
-	case "required":
-		return fmt.Sprintf("%s is required", fe.Field())
-	case "min":
-		return fmt.Sprintf("%s must be at least %s characters", fe.Field(), fe.Param())
-	}
-
-	return "validation error"
 }
 
 func (t *TournamentRouter) UpdateTournamentByIdHandler(w http.ResponseWriter, r *http.Request) {
