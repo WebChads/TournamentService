@@ -31,14 +31,43 @@ type Bid struct {
 
 func NewBid(b dtos.CreateBidRequest) Bid {
 	return Bid{
-		BidId: uuid.New(),
-		FullName: b.FullName,
-		Age: b.Age,
-		AvatarUrl: b.AvatarUrl,
-		BidStatus: 3,
-		UserId: b.UserId,
+		BidId:        uuid.New(),
+		FullName:     b.FullName,
+		Age:          b.Age,
+		AvatarUrl:    b.AvatarUrl,
+		BidStatus:    3,
+		UserId:       b.UserId,
 		TournamentId: b.TournamentId,
 	}
+}
+
+func (r *BidRepository) SelectByStatus(
+	ctx context.Context, req dtos.GetBidRequest,
+) ([]dtos.GetBidResponse, error) {
+	query := `
+		SELECT full_name, age, avatar_url, bid_status
+		FROM bids WHERE user_id = $1 AND bid_status = $2
+	`
+
+	var bids []Bid
+	err := r.db.SelectContext(ctx, &bids, query, req.UserId, req.BidStatus)
+	if err != nil {
+		return nil, errors.New("failed to select tournaments: " + err.Error())
+	}
+
+	var responseBids []dtos.GetBidResponse
+	for _, bid := range bids {
+		response := dtos.GetBidResponse{
+			FullName: bid.FullName,
+			Age: bid.Age,
+			AvatarUrl: bid.AvatarUrl,
+			BidStatus: bid.BidStatus,
+		}
+
+		responseBids = append(responseBids, response)
+	}
+
+	return responseBids, nil
 }
 
 func (r *BidRepository) Insert(ctx context.Context, req dtos.CreateBidRequest) error {

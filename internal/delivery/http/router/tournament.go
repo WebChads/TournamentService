@@ -123,6 +123,7 @@ func (t *TournamentRouter) GetTournamentByOwnHandler(w http.ResponseWriter, r *h
 	// Use mock data to test just for now
 	userId, err := uuid.Parse("a8c75926-7a6e-4263-90f0-aecd383f8242")
 	if err != nil {
+		t.logger.Error("user id conversion", slogerr.Error(err))
 		return
 	}
 
