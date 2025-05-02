@@ -119,7 +119,7 @@ func (r *BidRepository) UpdateStatus(
 	ctx context.Context, dto dtos.UpdateBidStatusRequest,
 ) error {
 	bid := UpdateBid{
-		BidId: dto.BidId,
+		BidId:     dto.BidId,
 		BidStatus: dto.BidStatus,
 	}
 
@@ -142,6 +142,35 @@ func (r *BidRepository) UpdateStatus(
 	_, err = tx.NamedExecContext(ctx, query, bid)
 	if err != nil {
 		return errors.New("failed to update bid status: " + err.Error())
+	}
+
+	// Commit transaction
+	if err = tx.Commit(); err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
+	}
+
+	return nil
+}
+
+func (r *BidRepository) DeleteById(ctx context.Context, bidId uuid.UUID) error {
+	// Start transaction
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return errors.New("failed to begin transaction: " + err.Error())
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	query := `DELETE FROM bids WHERE bid_id = :bid_id`
+
+	params := map[string]any{"bid_id": bidId}
+
+	_, err = tx.NamedExecContext(ctx, query, params)
+	if err != nil {
+		return errors.New("failed to delete bid: " + err.Error())
 	}
 
 	// Commit transaction

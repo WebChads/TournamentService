@@ -22,6 +22,7 @@ type BidRepository interface {
 	SelectByStatus(ctx context.Context, dto dtos.GetBidRequest) ([]dtos.GetBidResponse, error)
 	Insert(ctx context.Context, tournament dtos.CreateBidRequest) error
 	UpdateStatus(ctx context.Context, dto dtos.UpdateBidStatusRequest) error
+	DeleteById(ctx context.Context, bidId uuid.UUID) error
 }
 
 // All service repositories
@@ -34,7 +35,7 @@ type Repositories struct {
 func NewRepositories(db *sqlx.DB) *Repositories {
 	return &Repositories{
 		Tournament: storage.NewTournamentRepository(db),
-		Bid: storage.NewBidRepository(db),
+		Bid:        storage.NewBidRepository(db),
 		// ...
 	}
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/WebChads/TournamentService/internal/models/dtos"
 	slogerr "github.com/WebChads/TournamentService/internal/pkg/logger"
+	"github.com/google/uuid"
 )
 
 type BidUsecase struct {
@@ -48,6 +49,16 @@ func (u *BidUsecase) UpdateStatus(
 	err := u.repository.UpdateStatus(ctx, dto)
 	if err != nil {
 		u.logger.Error("update bid status", slogerr.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func (u *BidUsecase) DeleteById(ctx context.Context, bidId uuid.UUID) error {
+	err := u.repository.DeleteById(ctx, bidId)
+	if err != nil {
+		u.logger.Error("delete bid by id", slogerr.Error(err))
 		return err
 	}
 
