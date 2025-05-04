@@ -6,11 +6,11 @@ import (
 	"os"
 
 	prettylogger "github.com/WebChads/AccountService/pkg/pretty_logger"
+	_ "github.com/WebChads/TournamentService/docs"
 	"github.com/WebChads/TournamentService/internal/config"
 	server "github.com/WebChads/TournamentService/internal/delivery/http"
 	slogerr "github.com/WebChads/TournamentService/internal/pkg/logger"
 	"github.com/WebChads/TournamentService/internal/storage/pgsql/migrations"
-	_ "github.com/WebChads/TournamentService/docs"
 )
 
 // @title           Swagger Example API
@@ -34,8 +34,8 @@ import (
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
 	// Init config
-	config := config.NewServerConfig()
-	if config == nil {
+	config, env := config.NewServerConfig()
+	if config == nil || env == nil {
 		return
 	}
 
@@ -46,7 +46,7 @@ func main() {
 	ctx := context.Background()
 
 	// Init database
-	db, err := server.NewDB(ctx, config.DatabaseURL)
+	db, err := server.NewDB(ctx, env.DatabaseURL)
 	if err != nil {
 		logger.Error("failed to create database", slogerr.Error(err))
 		return
@@ -60,31 +60,31 @@ func main() {
 
 	// Configure server
 	router := server.InitRouter(config, logger, db)
-	srv := server.NewServer(router, config.Address)
+	srv := server.NewServer(router, env.Address)
 
 	// Run server
-	logger.Info("server started", "address", config.Address)
+	logger.Info("server started", "address", env.Address)
 	srv.ListenAndServe()
 }
 
 const (
-	envLocal = "local"
-	envStage = "stage"
-	envProd  = "prod"
+	logLocal = "local"
+	logStage = "stage"
+	logProd  = "prod"
 )
 
 func setupLogger(env string) *slog.Logger {
 	var log *slog.Logger
 
 	switch env {
-	case envLocal:
+	case logLocal:
 		handler := prettylogger.NewPrettyHandler(os.Stdout)
 		log = slog.New(handler)
-	case envStage:
+	case logStage:
 		log = slog.New(
 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
 		)
-	case envProd:
+	case logProd:
 		log = slog.New(
 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
 		)
