@@ -20,7 +20,7 @@ SERVER_ENV=local is set by default, so the export from command
 line can be omitted. 
 ```
 export SERVER_ENV=local
-go run cmd/app/main.go (or og build cmd/app/main.go && ./main)
+go run cmd/app/main.go (or go build cmd/app/main.go && ./main)
 ```
 
 ### Run service in the Docker container:
