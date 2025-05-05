@@ -1,0 +1,5 @@
+# config file for local dev
+
+log_level: "local"
+address: "localhost:5000"
+database_url: "postgres://postgres:postgres@localhost:5432/tournament_service?sslmode=disable"

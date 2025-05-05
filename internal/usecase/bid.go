@@ -1,0 +1,66 @@
+package usecase
+
+import (
+	"context"
+	"log/slog"
+
+	"github.com/WebChads/TournamentService/internal/models/dtos"
+	slogerr "github.com/WebChads/TournamentService/internal/pkg/logger"
+	"github.com/google/uuid"
+)
+
+type BidUsecase struct {
+	logger     *slog.Logger
+	repository BidRepository
+}
+
+func NewBidUsecase(r BidRepository, l *slog.Logger) *BidUsecase {
+	return &BidUsecase{
+		logger:     l,
+		repository: r,
+	}
+}
+
+func (u *BidUsecase) GetByStatus(
+	ctx context.Context, dto dtos.GetBidRequest,
+) ([]dtos.GetBidResponse, error) {
+	bids, err := u.repository.SelectByStatus(ctx, dto)
+	if err != nil {
+		u.logger.Error("select bid by id", slogerr.Error(err))
+		return nil, err
+	}
+
+	return bids, nil
+}
+
+func (u *BidUsecase) Create(ctx context.Context, bid dtos.CreateBidRequest) error {
+	err := u.repository.Insert(ctx, bid)
+	if err != nil {
+		u.logger.Error("create bid", slogerr.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func (u *BidUsecase) UpdateStatus(
+	ctx context.Context, dto dtos.UpdateBidStatusRequest,
+) error {
+	err := u.repository.UpdateStatus(ctx, dto)
+	if err != nil {
+		u.logger.Error("update bid status", slogerr.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func (u *BidUsecase) DeleteById(ctx context.Context, bidId uuid.UUID) error {
+	err := u.repository.DeleteById(ctx, bidId)
+	if err != nil {
+		u.logger.Error("delete bid by id", slogerr.Error(err))
+		return err
+	}
+
+	return nil
+}
